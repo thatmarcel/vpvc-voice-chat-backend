@@ -9,7 +9,7 @@ public class VoiceChatServer {
     private NetManager server;
 
     private List<PeerInfo> allPeers = new();
-    private Dictionary<NetPeer, List<PeerInfo>> peerPairs = new();
+    private Dictionary<NetPeer, Tuple<string, List<PeerInfo>>> peerPairs = new();
 
     public VoiceChatServer() {
         listener = new EventBasedNetListener();
@@ -33,14 +33,14 @@ public class VoiceChatServer {
                 }
             }
 
-            foreach (var peerPair in new Dictionary<NetPeer, List<PeerInfo>>(peerPairs)) {
+            foreach (var peerPair in new Dictionary<NetPeer, Tuple<string, List<PeerInfo>>>(peerPairs)) {
                 if (peerPair.Key == peer) {
                     peerPairs.Remove(peerPair.Key);
                 }
 
-                foreach (var peerInfo in new List<PeerInfo>(peerPair.Value)) {
+                foreach (var peerInfo in new List<PeerInfo>(peerPair.Value.Item2)) {
                     if (peerInfo.peer == peer) {
-                        peerPair.Value.Remove(peerInfo);
+                        peerPair.Value.Item2.Remove(peerInfo);
                     }
                 }
             }
@@ -55,9 +55,10 @@ public class VoiceChatServer {
             }
             
             if (peerPairs.ContainsKey(fromPeer)) {
-                peerPairs[fromPeer].ForEach(pi => {
+                var peerData = peerPairs[fromPeer];
+                peerData.Item2.ForEach(pi => {
                     var writer = new NetDataWriter();
-                    writer.Put(pi.id);
+                    writer.Put(peerData.Item1);
                     writer.Put(receivedBytes);
                     pi.peer.Send(writer, DeliveryMethod.Sequenced);
                 });
@@ -94,23 +95,22 @@ public class VoiceChatServer {
                 
                 var peerInfo = new PeerInfo(fromPeer, senderId, partyJoinCode);
                 allPeers.Add(peerInfo);
+                
+                peerPairs[fromPeer] = new Tuple<string, List<PeerInfo>>(senderId, peerInfosInParty);
 
                 if (peerInfosInParty.Count > 0) {
                     Logger.LogVerbose($"Found matching party (sender id: {senderId}, party join code: {partyJoinCode})");
 
-                    peerPairs[fromPeer] = peerInfosInParty;
+                    peerPairs[fromPeer] = new Tuple<string, List<PeerInfo>>(senderId, peerInfosInParty);
 
                     foreach (var peerInfoInParty in peerInfosInParty) {
                         if (peerPairs.ContainsKey(peerInfoInParty.peer)) {
-                            peerPairs[peerInfoInParty.peer].Add(peerInfo);
-                        } else {
-                            peerPairs[peerInfoInParty.peer] = new List<PeerInfo> { peerInfo };
-                            peerInfoInParty.peer.Send(new byte[] { 1 }, DeliveryMethod.ReliableOrdered);
+                            peerPairs[peerInfoInParty.peer].Item2.Add(peerInfo);
                         }
                     }
-                    
-                    fromPeer.Send(new byte[] { 1 }, DeliveryMethod.ReliableOrdered);
                 }
+                
+                fromPeer.Send(new byte[] { 1 }, DeliveryMethod.ReliableOrdered);
             }
         };
 
