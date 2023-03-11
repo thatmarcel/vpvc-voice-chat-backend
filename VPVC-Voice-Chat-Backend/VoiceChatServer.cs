@@ -1,6 +1,5 @@
 ﻿using System.Text;
 using LiteNetLib;
-using LiteNetLib.Utils;
 
 namespace VPVC_Voice_Chat_Backend; 
 
@@ -13,7 +12,11 @@ public class VoiceChatServer {
 
     public VoiceChatServer() {
         listener = new EventBasedNetListener();
-        server = new NetManager(listener);
+        server = new NetManager(listener) {
+            UnsyncedEvents = true,
+            UnsyncedReceiveEvent = true,
+            AutoRecycle = true
+        };
     }
 
     public void Start() {
@@ -101,11 +104,11 @@ public class VoiceChatServer {
                 if (peerInfosInParty.Count > 0) {
                     Logger.LogVerbose($"Found matching party (sender id: {senderId}, party join code: {partyJoinCode})");
 
-                    peerPairs[fromPeer] = new Tuple<string, List<PeerInfo>>(senderId, peerInfosInParty);
-
                     foreach (var peerInfoInParty in peerInfosInParty) {
                         if (peerPairs.ContainsKey(peerInfoInParty.peer)) {
-                            peerPairs[peerInfoInParty.peer].Item2.Add(peerInfo);
+                            if (!peerPairs[peerInfoInParty.peer].Item2.Contains(peerInfo)) {
+                                peerPairs[peerInfoInParty.peer].Item2.Add(peerInfo);
+                            }
                         }
                     }
                 }
@@ -113,11 +116,6 @@ public class VoiceChatServer {
                 fromPeer.Send(new byte[] { 1 }, DeliveryMethod.ReliableOrdered);
             }
         };
-
-        for (;;) {
-            server.PollEvents();
-            Thread.Sleep(1);
-        }
         
         // ReSharper disable once FunctionNeverReturns
     }
