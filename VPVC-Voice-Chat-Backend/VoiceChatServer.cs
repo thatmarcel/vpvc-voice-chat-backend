@@ -57,10 +57,10 @@ public class VoiceChatServer {
             if (peerPairs.ContainsKey(fromPeer)) {
                 var peerData = peerPairs[fromPeer];
                 peerData.Item2.ForEach(pi => {
-                    var writer = new NetDataWriter();
-                    writer.Put(peerData.Item1);
-                    writer.Put(receivedBytes);
-                    pi.peer.Send(writer, DeliveryMethod.Sequenced);
+                    pi.dataWriter.Reset();
+                    pi.dataWriter.Put(peerData.Item1);
+                    pi.dataWriter.Put(receivedBytes);
+                    pi.peer.Send(pi.dataWriter, DeliveryMethod.Sequenced);
                 });
                 return;
             }
