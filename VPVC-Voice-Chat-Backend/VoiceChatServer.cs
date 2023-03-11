@@ -117,6 +117,8 @@ public class VoiceChatServer {
             }
         };
         
+        for (;;) { Thread.Sleep(1); }
+        
         // ReSharper disable once FunctionNeverReturns
     }
 }
