@@ -49,7 +49,7 @@ public class VoiceChatServer {
             }
         };
 
-        listener.NetworkReceiveEvent += (fromPeer, dataReader, deliveryMethod) => {
+        listener.NetworkReceiveEvent += (fromPeer, dataReader, channel, deliveryMethod) => {
             var receivedBytes = dataReader.GetRemainingBytes();
 
             if (receivedBytes == null) {
