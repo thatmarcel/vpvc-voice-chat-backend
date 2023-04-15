@@ -24,7 +24,7 @@ jobs:
             run: cd VPVC-Voice-Chat-Backend && dotnet publish -r linux-x64 -c Release --self-contained true -p:PublishSingleFile=true -o ../build-output
         -
             name: Prepare upload
-            run: mkdir -p ./upload/internal/backend/executables/ && mv ./build-output/VPVC-Voice-Chat-Backend ./upload/internal/backend/executables/
+            run: mkdir -p ./upload/internal/backend/executables/ && mv ./build-output/VPVC-Voice-Chat-Backend ./upload/internal/backend/executables/ && echo ${{ github.sha }} > ./upload/internal/backend/latest-voice-chat-backend-commit.txt
         -
             name: Upload to CDN
             uses: ayeressian/bunnycdn-storage-deploy@v1.1.1
