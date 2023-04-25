@@ -6,8 +6,8 @@ env:
     DOTNET_VERSION: 7
 
 jobs:
-    publish-executable:
-        name: Publish executable
+    publish-linux-x64-executable:
+        name: Publish Linux x64 executable
         runs-on: ubuntu-latest
         steps:
         - uses: actions/checkout@v3
@@ -24,7 +24,37 @@ jobs:
             run: cd VPVC-Voice-Chat-Backend && dotnet publish -r linux-x64 -c Release --self-contained true -p:PublishSingleFile=true -o ../build-output
         -
             name: Prepare upload
-            run: mkdir -p ./upload/internal/backend/executables/ && mv ./build-output/VPVC-Voice-Chat-Backend ./upload/internal/backend/executables/ && echo ${{ github.sha }} > ./upload/internal/backend/latest-voice-chat-backend-commit.txt
+            run: mkdir -p ./upload/internal/backend/executables/x64/ && mv ./build-output/VPVC-Voice-Chat-Backend ./upload/internal/backend/executables/x64/ && echo ${{ github.sha }} > ./upload/internal/backend/latest-voice-chat-backend-commit-x64.txt
+        -
+            name: Upload to CDN
+            uses: ayeressian/bunnycdn-storage-deploy@v1.1.1
+            with:
+                source: "./upload"
+                storageZoneName: ${{ secrets.BUNNY_CDN_STORAGE_ZONE_NAME }}
+                accessKey: ${{ secrets.BUNNY_CDN_STORAGE_ZONE_KEY }}
+                pullZoneId: ${{ secrets.BUNNY_CDN_PULL_ZONE_ID }}
+                pullZoneAccessKey: ${{ secrets.BUNNY_CDN_PULL_ZONE_KEY }}
+                remove: "false"
+                purge: "true"
+    publish-linux-arm64-executable:
+        name: Publish Linux arm64 executable
+        runs-on: ubuntu-latest
+        steps:
+        - uses: actions/checkout@v3
+        -
+            name: Setup .NET Core
+            uses: actions/setup-dotnet@v3
+            with:
+                dotnet-version: ${{ env.DOTNET_VERSION }}
+        -
+            name: Fetch dependencies
+            run: dotnet restore
+        -
+            name: Build project
+            run: cd VPVC-Voice-Chat-Backend && dotnet publish -r linux-arm64 -c Release --self-contained true -p:PublishSingleFile=true -o ../build-output
+        -
+            name: Prepare upload
+            run: mkdir -p ./upload/internal/backend/executables/arm64/ && mv ./build-output/VPVC-Voice-Chat-Backend ./upload/internal/backend/executables/arm64/ && echo ${{ github.sha }} > ./upload/internal/backend/latest-voice-chat-backend-commit-arm64.txt
         -
             name: Upload to CDN
             uses: ayeressian/bunnycdn-storage-deploy@v1.1.1
