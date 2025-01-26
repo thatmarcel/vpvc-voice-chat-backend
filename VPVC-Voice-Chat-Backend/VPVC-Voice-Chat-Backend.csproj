@@ -2,7 +2,7 @@
 
     <PropertyGroup>
         <OutputType>Exe</OutputType>
-        <TargetFramework>net7.0</TargetFramework>
+        <TargetFramework>net9.0</TargetFramework>
         <RootNamespace>VPVC_Voice_Chat_Backend</RootNamespace>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
@@ -16,7 +16,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <PackageReference Include="LiteNetLib" Version="1.0.1.1" />
+      <PackageReference Include="LiteNetLib" Version="1.3.1" />
     </ItemGroup>
 
 </Project>
