@@ -85,24 +85,24 @@ public class VoiceChatServer {
                     return;
                 }
 
-                var partyJoinCode = receivedInfoStringParts[0];
+                var partyIdentifier = receivedInfoStringParts[0];
                 var senderId = receivedInfoStringParts[1];
 
                 if (senderId.Length != 4) {
                     return;
                 }
             
-                Logger.LogVerbose($"Received sender id: {senderId}, party join code: {partyJoinCode}");
+                Logger.LogVerbose($"Received sender id: {senderId}, party join code: {partyIdentifier}");
 
-                var peerInfosInParty = allPeers.Where(pi => pi.partyJoinCode == partyJoinCode).ToList();
+                var peerInfosInParty = allPeers.Where(pi => pi.partyIdentifier == partyIdentifier).ToList();
                 
-                var peerInfo = new PeerInfo(fromPeer, senderId, partyJoinCode);
+                var peerInfo = new PeerInfo(fromPeer, senderId, partyIdentifier);
                 allPeers.Add(peerInfo);
                 
                 peerPairs[fromPeer] = new Tuple<string, List<PeerInfo>>(senderId, peerInfosInParty);
 
                 if (peerInfosInParty.Count > 0) {
-                    Logger.LogVerbose($"Found matching party (sender id: {senderId}, party join code: {partyJoinCode})");
+                    Logger.LogVerbose($"Found matching party (sender id: {senderId}, party join code: {partyIdentifier})");
 
                     foreach (var peerInfoInParty in peerInfosInParty) {
                         if (peerPairs.ContainsKey(peerInfoInParty.peer)) {

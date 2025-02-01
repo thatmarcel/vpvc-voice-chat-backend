@@ -6,13 +6,13 @@ namespace VPVC_Voice_Chat_Backend;
 public class PeerInfo {
     public NetPeer peer;
     public string id;
-    public string partyJoinCode;
+    public string partyIdentifier;
     public NetDataWriter dataWriter;
 
-    public PeerInfo(NetPeer peer, string id, string partyJoinCode) {
+    public PeerInfo(NetPeer peer, string id, string partyIdentifier) {
         this.peer = peer;
         this.id = id;
-        this.partyJoinCode = partyJoinCode;
+        this.partyIdentifier = partyIdentifier;
         this.dataWriter = new NetDataWriter();
     }
 }
